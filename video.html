@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HLS Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  </head>
+  <body>
+    <h1>HLS Video Stream</h1>
+    <video id="video" controls width="640" height="360"></video>
+
+    <script>
+      function getVideoIdFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("video_id"); // FIXED HERE
+      }
+
+      const videoId = getVideoIdFromURL();
+      const video = document.getElementById("video");
+
+      if (!videoId) {
+        document.body.innerHTML +=
+          "<p style='color:red;'>Missing video_id in URL</p>";
+      } else {
+        const videoSrc = `/hls/${videoId}/master.m3u8`;
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = videoSrc;
+          video.addEventListener("loadedmetadata", () => video.play());
+        }
+      }
+    </script>
+  </body>
+</html>
